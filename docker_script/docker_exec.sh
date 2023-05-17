@@ -31,7 +31,8 @@ function start_container(){
 function exec_container(){
     log_info "runing: ${docker_container_name}"
 
-    docker exec -it -w /root/shared_folder ${docker_container_name} /bin/bash
+    # docker exec -it -w /root/shared_folder ${docker_container_name} /bin/bash
+    docker exec -it  ${docker_container_name} /bin/zsh
 }
 
 function is_build_image(){

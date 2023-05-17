@@ -10,7 +10,7 @@ docker_image_version=$(yq e   '.docker_config.docker_image_version'  $config_fil
 function dockerfile_build(){
   log_info "create $docker_image_name docker image ... "
   # docker build --build-arg dockerfile_path=$SCRIPT_DIR/../ -t $docker_image_name $SCRIPT_DIR/..
-  sudo docker build - < "$SCRIPT_DIR/../Dockerfile" -t lidar_mapping
+  sudo docker build - < "$SCRIPT_DIR/../Dockerfile" -t $docker_image_name:$docker_image_version
 }
 
 
