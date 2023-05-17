@@ -25,8 +25,7 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
 # ==========> INSTALL ROS melodic <=============
 RUN apt update && apt install -y curl lsb-release
 # for Chinese developer
-RUN sh -c '. /etc/lsb-release && echo "deb http://mirrors.ustc.edu.cn/ros/ubuntu/ `lsb_release -cs` main" > /etc/apt/sources.list.d/ros-la
-test.list'
+RUN sh -c '. /etc/lsb-release && echo "deb http://mirrors.ustc.edu.cn/ros/ubuntu/ `lsb_release -cs` main" > /etc/apt/sources.list.d/ros-latest.list'
 RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
 RUN apt update && apt install -y ros-melodic-desktop-full
 RUN apt-get install -y libgtest-dev ros-melodic-catkin python-pip python3-pip
@@ -60,7 +59,7 @@ RUN apt-get install --no-install-recommends -y \
 
 # ======================> DEPENDENCIES <=========================
 # gtsam 4.0.2 --> https://github.com/borglab/gtsam/issues/145
-RUN git clone git clone https://github.com/borglab/gtsam.git \
+RUN git clone https://github.com/borglab/gtsam.git \
     && cd gtsam && git checkout b10963802c13893611d5a88894879bed47adf9e0 \
     && mkdir build && cd build && cmake .. && make -j$(nproc) && make install
 

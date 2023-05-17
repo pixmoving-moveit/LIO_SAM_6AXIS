@@ -1,0 +1,4 @@
+docker_config:
+  docker_image_name: lidar_mapping1
+  docker_image_version: latest
+  docker_container_name: lidar_mapping1
