@@ -3,10 +3,10 @@ lio_sam_6axis:
   #  velodyne16 and stim300(6 axis)
 
   # Topics
-  pointCloudTopic: "velodyne_points"               # Point cloud data
-  imuTopic: "imu/data"                         # IMU data
+  pointCloudTopic: "/velodyne_points"               # Point cloud data
+  imuTopic: "/zed2i/zed_node/imu/data_raw"                         # IMU data
   odomTopic: "odometry/imu"                   # IMU pre-preintegration odometry, same frequency as IMU
-  gpsTopic: "fix"                   # GPS odometry topic from navsat, see module_navsat.launch file
+  gpsTopic: "gps_odom"                   # GPS odometry topic from navsat, see module_navsat.launch file
 
   # Frames
   lidarFrame: "base_link"
@@ -20,8 +20,7 @@ lio_sam_6axis:
   useImuHeadingInitialization: false         # if using GPS data, set to "false"
   useGpsElevation: true                      # if GPS elevation is bad, set to "false"
   gpsCovThreshold: 8                        # m^2, threshold for using GPS data
-  poseCovThreshold: 25.0                      # m^2, threshold for using GPS data
-  gpsDistance: 0.5                           # the distance between two gps point used for optimization
+  poseCovThreshold: 25                      # m^2, threshold for using GPS data
 
   # debug setting
   debugLidarTimestamp: false
@@ -32,7 +31,7 @@ lio_sam_6axis:
   savePCD: false                              # https://github.com/TixiaoShan/LIO-SAM/issues/3
   savePCDDirectory: "/Downloads/LOAM/"        # actually we do not use the floder to save maps
 
-  sensor: velodyne                            # lidar sensor type, 'velodyne' or 'ouster' or 'livox' or 'hesai'
+  sensor: robosense                           # lidar sensor type, 'velodyne' or 'ouster' or 'livox' or 'hesai' or 'robosense'
   N_SCAN: 16                                  # number of lidar channel (i.e., Velodyne/Ouster: 16, 32, 64, 128, Livox Horizon: 6)
   Horizon_SCAN: 1800                          # lidar horizontal resolution (Velodyne:1800, Ouster:512,1024,2048, Livox Horizon: 4000)
   downsampleRate: 1                           # default: 1. Downsample your data if too many points. i.e., 16 = 64 / 4, 16 = 16 / 1
@@ -40,22 +39,22 @@ lio_sam_6axis:
   lidarMaxRange: 1000.0
 
   # IMU Settings
-  imuAccNoise: 3.9939570888238808e-03
-  imuGyrNoise: 1.5636343949698187e-03
-  imuAccBiasN: 6.4356659353532566e-05
-  imuGyrBiasN: 3.5640318696367613e-05
+  imuAccNoise: 2.0716736451356646e-02
+  imuGyrNoise: 1.5135645045523897e-03
+  imuAccBiasN: 3.9973737324042121e-04
+  imuGyrBiasN: 2.7047664583842222e-06
   imuGravity: 9.80511
   imuRPYWeight: 0.01
 
   # Extrinsics (lidar -> IMU)
-  imu_type: 0   # 0: 6axis, 1:9 axis
-  extrinsicTrans: [ 0.0, 0.0, 0.0 ]
-  extrinsicRot: [ 1, 0, 0,
-                  0, 1, 0,
-                  0, 0, 1 ]
-  extrinsicRPY: [ 1, 0, 0,
-                  0, 1, 0,
-                  0, 0, 1 ]
+  imu_type: 1   # 0: 6axis, 1:9 axis
+  extrinsicTrans: [ -0.072, 0.049, -0.610 ]
+  extrinsicRot: [ 0.9997022,  0.0197387,  0.0143532,
+                  -0.0202424,  0.9991524,  0.0358430,
+                  -0.0136336, -0.0361229,  0.9992543]
+  extrinsicRPY: [ 0.9997022,  0.0197387,  0.0143532,
+                  -0.0202424,  0.9991524,  0.0358430,
+                  -0.0136336, -0.0361229,  0.9992543]
 
   # LOAM feature threshold
   edgeThreshold: 1.0
@@ -86,8 +85,8 @@ lio_sam_6axis:
   loopClosureEnableFlag: true
   loopClosureFrequency: 1.0                     # Hz, regulate loop closure constraint add frequency
   surroundingKeyframeSize: 30                   # submap size (when loop closure enabled)
-  historyKeyframeSearchRadius: 30.0             # meters, key frame that is within n meters from current pose will be considerd for loop closure
-  historyKeyframeSearchTimeDiff: 40.0           # seconds, key frame that is n seconds older will be considered for loop closure
+  historyKeyframeSearchRadius: 25.0             # meters, key frame that is within n meters from current pose will be considerd for loop closure
+  historyKeyframeSearchTimeDiff: 25.0           # seconds, key frame that is n seconds older will be considered for loop closure
   historyKeyframeSearchNum: 25                  # number of hostory key frames will be fused into a submap for loop closure
   historyKeyframeFitnessScore: 0.9              # icp threshold, the smaller the better alignment
 

@@ -2,9 +2,11 @@ cmake_minimum_required(VERSION 2.8.3)
 project(lio_sam_6axis)
 
 set(CMAKE_BUILD_TYPE "Release")
-set(CMAKE_CXX_FLAGS "-std=c++14")
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "-std=c++17")
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g -pthread")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/usr/share/cmake/geographiclib/")
+
 find_package(Boost REQUIRED COMPONENTS timer)
 find_package(catkin REQUIRED COMPONENTS
         tf
@@ -22,7 +24,9 @@ find_package(catkin REQUIRED COMPONENTS
         visualization_msgs
         rosbag
         )
-
+find_package(GeographicLib REQUIRED)
+find_package(Eigen3 REQUIRED)
+        
 find_package(OpenMP REQUIRED)
 find_package(PCL REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -92,10 +96,18 @@ link_directories(
 ## Build ##
 ###########
 
+# utm converter
+add_library(utm_converter STATIC
+ src/utm_converter.cpp
+)
+target_link_libraries(utm_converter
+  ${catkin_LIBRARIES}
+  ${GeographicLib_LIBRARIES}
+)
 
 # Gps odometry
 add_executable(${PROJECT_NAME}_gpsOdometry src/simpleGpsOdom.cpp)
-target_link_libraries(${PROJECT_NAME}_gpsOdometry ${catkin_LIBRARIES} ${LIBXML2_LIBRARIES} ${Y_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_gpsOdometry ${catkin_LIBRARIES} ${LIBXML2_LIBRARIES} ${Y_LIBRARIES} utm_converter)
 
 # Range Image Projection
 add_executable(${PROJECT_NAME}_imageProjection src/imageProjection.cpp)
@@ -116,3 +128,18 @@ target_link_libraries(${PROJECT_NAME}_mapOptmization ${catkin_LIBRARIES} ${PCL_L
 # IMU Preintegration
 add_executable(${PROJECT_NAME}_imuPreintegration src/imuPreintegration.cpp)
 target_link_libraries(${PROJECT_NAME}_imuPreintegration ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} gtsam ${LIBXML2_LIBRARIES} ${Y_LIBRARIES})
+
+# installation
+install(
+  TARGETS ${PROJECT_NAME}_gpsOdometry ${PROJECT_NAME}_imageProjection ${PROJECT_NAME}_featureExtraction ${PROJECT_NAME}_mapOptmization ${PROJECT_NAME}_imuPreintegration
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(
+  DIRECTORY
+    launch
+    config
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)

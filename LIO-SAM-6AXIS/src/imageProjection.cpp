@@ -57,6 +57,20 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(OusterPointXYZIRT,
                                           (uint32_t, range, range)
 )
 
+struct RsPointXYZIRT
+{
+  PCL_ADD_POINT4D;
+  uint8_t intensity;
+  uint16_t ring = 0;
+  double timestamp = 0;
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+} EIGEN_ALIGN16;
+
+POINT_CLOUD_REGISTER_POINT_STRUCT(
+  RsPointXYZIRT, (float, x, x)(float, y, y)(float, z, z)(std::uint8_t, intensity, intensity)(
+                   std::uint16_t, ring, ring)(double, timestamp, timestamp));
+
+
 
 
 //struct OusterPointXYZIRT {
@@ -122,6 +136,7 @@ private:
     pcl::PointCloud<PointXYZIRT>::Ptr laserCloudIn;
     pcl::PointCloud<OusterPointXYZIRT>::Ptr tmpOusterCloudIn;
     pcl::PointCloud<PandarPointXYZIRT>::Ptr tmpPandarCloudIn;
+    pcl::PointCloud<RsPointXYZIRT>::Ptr tmpRobosenseCloudIn;
     pcl::PointCloud<PointType>::Ptr fullCloud;
     pcl::PointCloud<PointType>::Ptr extractedCloud;
 
@@ -173,6 +188,7 @@ public:
         laserCloudIn.reset(new pcl::PointCloud<PointXYZIRT>());
         tmpOusterCloudIn.reset(new pcl::PointCloud<OusterPointXYZIRT>());
         tmpPandarCloudIn.reset(new pcl::PointCloud<PandarPointXYZIRT>());
+        tmpRobosenseCloudIn.reset(new pcl::PointCloud<RsPointXYZIRT>());
         fullCloud.reset(new pcl::PointCloud<PointType>());
         extractedCloud.reset(new pcl::PointCloud<PointType>());
 
@@ -265,7 +281,7 @@ public:
         // convert cloud
         currentCloudMsg = std::move(cloudQueue.front());
         cloudQueue.pop_front();
-        if (sensor == SensorType::VELODYNE || sensor == SensorType::LIVOX) {
+        if (sensor == SensorType::VELODYNE || sensor == SensorType::LIVOX ) {
             pcl::moveFromROSMsg(currentCloudMsg, *laserCloudIn);
         } else if (sensor == SensorType::OUSTER) {
             // Convert to Velodyne format
@@ -304,7 +320,27 @@ public:
                 //dst.tiSme = src.t * 1e-9f;
                 dst.time = src.timestamp - time_begin; // s
             }
-        } else {
+        } else if (sensor == SensorType::ROBOSENSE) {
+           // Convert to Velodyne format
+            pcl::moveFromROSMsg(currentCloudMsg, *tmpRobosenseCloudIn);
+            laserCloudIn->points.resize(tmpRobosenseCloudIn->size());
+            laserCloudIn->is_dense = tmpRobosenseCloudIn->is_dense ? tmpRobosenseCloudIn->is_dense : true;
+            double time_begin = tmpRobosenseCloudIn->points[0].timestamp;
+            for (size_t i = 0; i < tmpRobosenseCloudIn->size(); i++) {
+                auto &src = tmpRobosenseCloudIn->points[i];
+                auto &dst = laserCloudIn->points[i];
+                // dst.x = src.y * -1;
+                // dst.y = src.x;
+                dst.x = src.x;
+                dst.y = src.y;
+                dst.z = src.z;
+                dst.intensity = src.intensity;
+                dst.ring = src.ring;
+                //dst.tiSme = src.t * 1e-9f;
+                dst.time = src.timestamp - time_begin; // s
+            } 
+        }
+         else {
             ROS_ERROR_STREAM("Unknown sensor type: " << int(sensor));
             ros::shutdown();
         }
@@ -626,7 +662,7 @@ public:
                 continue;
 
             int columnIdn = -1;
-            if (sensor == SensorType::VELODYNE || sensor == SensorType::OUSTER || sensor == SensorType::HESAI) {
+            if (sensor == SensorType::VELODYNE || sensor == SensorType::OUSTER || sensor == SensorType::HESAI || sensor == SensorType::ROBOSENSE) {
                 float horizonAngle = atan2(thisPoint.x, thisPoint.y) * 180 / M_PI;
                 static float ang_res_x = 360.0 / float(Horizon_SCAN);
                 columnIdn = -round((horizonAngle - 90.0) / ang_res_x) + Horizon_SCAN / 2;
