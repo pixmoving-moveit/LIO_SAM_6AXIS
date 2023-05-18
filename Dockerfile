@@ -55,6 +55,15 @@ RUN apt-get install --no-install-recommends -y \
     python3-pip \
     python3-colcon-common-extensions \
     python3-setuptools python3-vcstool \
+    # RS-16 dependent package
+    libyaml-cpp-dev \
+    libpcap-dev \
+    # ROS dependent package
+    ros-melodic-usb-cam \
+    ros-melodic-pcl-ros \
+    ros-melodic-image-view \
+    ros-melodic-ublox-msgs \
+    ros-melodic-roslint \
     && rm -rf /var/lib/apt/lists/*
 
 # ======================> DEPENDENCIES <=========================
@@ -69,6 +78,23 @@ RUN mv /usr/include/flann/ext/lz4.h /usr/include/flann/ext/lz4.h.bak  && \
     ln -s /usr/include/lz4.h /usr/include/flann/ext/lz4.h && \
     ln -s /usr/include/lz4hc.h /usr/include/flann/ext/lz4hc.h
 
-RUN mkdir -p /root/workspace/src && mkdir -p /home/lidar_mapping/data
+
 WORKDIR /root/workspace
-RUN cd src && git clone https://github.com/pixmoving-moveit/LIO_SAM_6AXIS.git
+
+RUN mkdir -p /root/workspace/lidar_mapping/src && mkdir -p /home/lidar_mapping/data \
+    && cd /root/workspace/lidar_mapping/src \
+    && git clone https://github.com/pixmoving-moveit/LIO_SAM_6AXIS.git \
+    && git clone -b ros1 https://github.com/pixmoving-moveit/rslidar_sdk.git \
+    && git clone -b feature/melodic-devel/chc https://github.com/pixmoving-moveit/nmea_navsat_driver.git \
+    && cd /root/workspace/lidar_mapping/src/rslidar_sdk && git submodule init && git submodule update \
+    # catkin_make ROS package
+    && cd /root/workspace/lidar_mapping/ \
+    && /bin/bash -c "source /opt/ros/melodic/setup.bash && catkin_make" 
+
+COPY ${dockerfile_path}/docker_copy/rosbag_collect_script.tar.gz /root/workspace/
+
+RUN tar -xzf /root/workspace/rosbag_collect_script.tar.gz -C /root/workspace/ \
+    && mv /root/workspace/docker_copy/rosbag_collect_script/yq /usr/bin/yq \
+    && mv /root/workspace/docker_copy/rosbag_collect_script/ /root/workspace/ \
+    && rm -rf /root/workspace/docker_copy && rm -rf /root/workspace/rosbag_collect_script.tar.gz
+

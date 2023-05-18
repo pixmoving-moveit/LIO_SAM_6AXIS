@@ -13,10 +13,10 @@ function install_container(){
     log_info "create container:$docker_container_name"
 
     volume_1="-v $HOME/shared_dir:/home/lidar_mapping/data"
-    volume_2=""
-    # volume_2='-e DISPLAY=:0 -e LIBGL_DEBUG=verbose -e LIBGL_ALWAYS_SOFTWARE=1 -v /tmp/.X11-unix:/tmp/.X11-unix'
+    # volume_2=""
+    volume_2="-e DISPLAY=:$DISPLAY -e LIBGL_DEBUG=verbose -e LIBGL_ALWAYS_SOFTWARE=1 -v /tmp/.X11-unix:/tmp/.X11-unix"
     base='--privileged --network host --device /dev/ttyUSB0'
-    gpu='-net=host --gpus all '
+    gpu="-net=host --gpus all"
     docker_image_name_version="$docker_image_name:$docker_image_version"
     docker run -d -it --name ${docker_container_name} $base $volume_1 $volume_2  $docker_image_name_version /bin/zsh
 
@@ -32,7 +32,8 @@ function exec_container(){
     log_info "runing: ${docker_container_name}"
 
     # docker exec -it -w /root/shared_folder ${docker_container_name} /bin/bash
-    docker exec -it  ${docker_container_name} /bin/zsh
+    env="-e DISPLAY=:$DISPLAY"
+    docker exec -it $env ${docker_container_name} /bin/zsh
 }
 
 function is_build_image(){

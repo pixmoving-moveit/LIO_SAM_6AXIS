@@ -10,7 +10,7 @@ docker_image_version=$(yq e   '.docker_config.docker_image_version'  $config_fil
 function dockerfile_build(){
   log_info "create $docker_image_name docker image ... "
   # docker build --build-arg dockerfile_path=$SCRIPT_DIR/../ -t $docker_image_name $SCRIPT_DIR/..
-  sudo docker build - < "$SCRIPT_DIR/../Dockerfile" -t $docker_image_name:$docker_image_version
+  sudo docker build --build-arg dockerfile_path=$SCRIPT_DIR/../  -t $docker_image_name:$docker_image_version  "$SCRIPT_DIR/../"
 }
 
 
@@ -32,12 +32,22 @@ function is_rm_image(){
   esac
 }
 
+
+function tar_compress_folder(){
+  log_info "dockerfile COPY file"
+  tar_file_path=$SCRIPT_DIR/../docker_copy/rosbag_collect_script.tar.gz
+  if [ ! -f "$tar_file_path" ]; then
+    cp $SCRIPT_DIR/yq $SCRIPT_DIR/../docker_copy/rosbag_collect_script/
+    tar -czvf  $tar_file_path   $SCRIPT_DIR/../docker_copy/rosbag_collect_script/
+  fi
+}
+
 function main(){
   if docker images | grep -q $docker_image_name; then
     log_warning "docker image exists:[$docker_image_name]"
     is_rm_image
   fi
-
+  tar_compress_folder
   dockerfile_build
 }
 
