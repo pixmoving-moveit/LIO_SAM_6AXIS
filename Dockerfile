@@ -85,7 +85,7 @@ RUN mkdir -p /root/workspace/lidar_mapping/src && mkdir -p /home/lidar_mapping/d
     && cd /root/workspace/lidar_mapping/src \
     && git clone https://github.com/pixmoving-moveit/LIO_SAM_6AXIS.git \
     && git clone -b ros1 https://github.com/pixmoving-moveit/rslidar_sdk.git \
-    && git clone -b feature/melodic-devel/chc https://github.com/pixmoving-moveit/nmea_navsat_driver.git \
+    && git clone -b feature/melodic-chc https://github.com/pixmoving-moveit/nmea_navsat_driver.git \
     && cd /root/workspace/lidar_mapping/src/rslidar_sdk && git submodule init && git submodule update \
     # catkin_make ROS package
     && cd /root/workspace/lidar_mapping/ \
@@ -96,5 +96,6 @@ COPY ${dockerfile_path}/docker_copy/rosbag_collect_script.tar.gz /root/workspace
 RUN tar -xzf /root/workspace/rosbag_collect_script.tar.gz -C /root/workspace/ \
     && mv /root/workspace/docker_copy/rosbag_collect_script/yq /usr/bin/yq \
     && mv /root/workspace/docker_copy/rosbag_collect_script/ /root/workspace/ \
+    && mv /root/workspace/docker_copy/start_sensing/ /root/workspace/ \
     && rm -rf /root/workspace/docker_copy && rm -rf /root/workspace/rosbag_collect_script.tar.gz
 
