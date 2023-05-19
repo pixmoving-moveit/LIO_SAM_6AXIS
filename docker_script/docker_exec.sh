@@ -12,7 +12,7 @@ docker_image_version=$(yq e   '.docker_config.docker_image_version'  $config_fil
 function install_container(){
     log_info "create container:$docker_container_name"
 
-    volume_1="-v $HOME/shared_dir:/home/lidar_mapping/data"
+    volume_1="-v $HOME/shared_dir:/home/lidar_mapping/rosbag"
     # volume_2=""
     volume_2="-e DISPLAY=:$DISPLAY -e LIBGL_DEBUG=verbose -e LIBGL_ALWAYS_SOFTWARE=1 -v /tmp/.X11-unix:/tmp/.X11-unix"
     base='--privileged --network host --device /dev/ttyUSB0'

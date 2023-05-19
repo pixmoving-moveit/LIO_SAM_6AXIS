@@ -85,9 +85,9 @@ RUN mv /usr/include/flann/ext/lz4.h /usr/include/flann/ext/lz4.h.bak  && \
 
 WORKDIR /root/workspace
 
-RUN mkdir -p /root/workspace/lidar_mapping/src && mkdir -p /home/lidar_mapping/data \
+RUN mkdir -p /root/workspace/lidar_mapping/src && mkdir -p /home/lidar_mapping/rosbag \
     && cd /root/workspace/lidar_mapping/src \
-    && git clone https://github.com/pixmoving-moveit/LIO_SAM_6AXIS.git \
+    && git clone -b feature/support-robosense-lidar https://github.com/pixmoving-moveit/LIO_SAM_6AXIS.git \
     && git clone -b ros1 https://github.com/pixmoving-moveit/rslidar_sdk.git \
     && git clone -b feature/melodic-chc https://github.com/pixmoving-moveit/nmea_navsat_driver.git \
     && cd /root/workspace/lidar_mapping/src/rslidar_sdk && git submodule init && git submodule update \
