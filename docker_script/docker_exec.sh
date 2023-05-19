@@ -11,14 +11,34 @@ docker_image_version=$(yq e   '.docker_config.docker_image_version'  $config_fil
 
 function install_container(){
     log_info "create container:$docker_container_name"
-
-    volume_1="-v $HOME/shared_dir:/home/lidar_mapping/rosbag"
-    # volume_2=""
-    volume_2="-e DISPLAY=:$DISPLAY -e LIBGL_DEBUG=verbose -e LIBGL_ALWAYS_SOFTWARE=1 -v /tmp/.X11-unix:/tmp/.X11-unix"
-    base='--privileged --network host --device /dev/ttyUSB0'
-    gpu="-net=host --gpus all"
     docker_image_name_version="$docker_image_name:$docker_image_version"
-    docker run -d -it --name ${docker_container_name} $base $volume_1 $volume_2  $docker_image_name_version /bin/zsh
+
+    local local_host="$(hostname)"
+    local display="${DISPLAY:-:0}"
+    local user="${USER}"
+    local uid="$(id -u)"
+    local group="$(id -g -n)"
+    local gid="$(id -g)"
+
+    docker run -itd  \
+      -e LIBGL_DEBUG=verbose \
+      -e LIBGL_ALWAYS_SOFTWARE=1 \
+      -e DISPLAY="${display}" \
+      -e DOCKER_USER="${user}" \
+      -e USER="${user}" \
+      -e DOCKER_USER_ID="${uid}" \
+      -e DOCKER_GRP="${group}" \
+      -e DOCKER_GRP_ID="${gid}" \
+      -v /tmp/.X11-unix:/tmp/.X11-unix \
+      -v $SCRIPT_DIR/../output/:/home/lidar_mapping/ \
+      -v $SCRIPT_DIR/../modules/:/root/workspace/lidar_mapping/src/ \
+      -v $SCRIPT_DIR/../tools/:/root/workspace/tools/ \
+      --privileged \
+      --gpus all \
+      --network host \
+      --device /dev/ttyUSB0 \
+      --name ${docker_container_name} \
+      $docker_image_name_version /bin/zsh
 
 }
 

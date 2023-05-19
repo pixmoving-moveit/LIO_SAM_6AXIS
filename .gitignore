@@ -67,6 +67,10 @@ ENV/
 # catkin
 build/
 devel/
+output/
 install/
 log/
 .catkin_tools/
+
+rslidar_sdk/
+nmea_navsat_driver/

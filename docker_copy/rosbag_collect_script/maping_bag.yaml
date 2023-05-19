@@ -1,6 +1,0 @@
-bag_prefix_name: maping_bag
-bag_dir_path: /home/lidar_mapping/rosbag
-topic_names: 
-  - /fix
-  - /rs/points
-  - /chc/imu

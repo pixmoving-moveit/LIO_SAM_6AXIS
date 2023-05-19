@@ -1,0 +1,10 @@
+repositories:
+  # ros driver package
+  rslidar_sdk:
+    type: git
+    url: https://github.com/pixmoving-moveit/rslidar_sdk.git
+    version: ros1
+  nmea_navsat_driver:
+    type: git
+    url: https://github.com/pixmoving-moveit/nmea_navsat_driver.git
+    version: feature/melodic-chc 

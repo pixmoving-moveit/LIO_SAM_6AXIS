@@ -26,6 +26,7 @@ To get started with LIO_SAM_6AXIS, follow these steps:
 
 ```bash
 git clone https://github.com/JokerJohn/LIO_SAM_6AXIS.git
+vcs import modules < lio_sam_6axis.repos --recursive
 ```
 
 2. Install the dependencies:

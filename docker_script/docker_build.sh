@@ -47,7 +47,7 @@ function main(){
     log_warning "docker image exists:[$docker_image_name]"
     is_rm_image
   fi
-  tar_compress_folder
+  # tar_compress_folder
   dockerfile_build
 }
 
