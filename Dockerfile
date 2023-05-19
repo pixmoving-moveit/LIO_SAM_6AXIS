@@ -64,6 +64,10 @@ RUN apt-get install --no-install-recommends -y \
     ros-melodic-image-view \
     ros-melodic-ublox-msgs \
     ros-melodic-roslint \
+    #
+    bc \
+    netcat \
+    iputils-ping \
     && rm -rf /var/lib/apt/lists/*
 
 # ======================> DEPENDENCIES <=========================
@@ -91,11 +95,12 @@ RUN mkdir -p /root/workspace/lidar_mapping/src && mkdir -p /home/lidar_mapping/d
     && cd /root/workspace/lidar_mapping/ \
     && /bin/bash -c "source /opt/ros/melodic/setup.bash && catkin_make" 
 
-COPY ${dockerfile_path}/docker_copy/rosbag_collect_script.tar.gz /root/workspace/
+COPY ${dockerfile_path}/docker_copy.tar.gz /root/workspace/
 
-RUN tar -xzf /root/workspace/rosbag_collect_script.tar.gz -C /root/workspace/ \
-    && mv /root/workspace/docker_copy/rosbag_collect_script/yq /usr/bin/yq \
+RUN tar -xzf /root/workspace/docker_copy.tar.gz -C /root/workspace/ \
+    && mv /root/workspace/docker_copy/yq /usr/bin/yq && chmod +x /usr/bin/yq\
     && mv /root/workspace/docker_copy/rosbag_collect_script/ /root/workspace/ \
     && mv /root/workspace/docker_copy/start_sensing/ /root/workspace/ \
+    # remove
     && rm -rf /root/workspace/docker_copy && rm -rf /root/workspace/rosbag_collect_script.tar.gz
 

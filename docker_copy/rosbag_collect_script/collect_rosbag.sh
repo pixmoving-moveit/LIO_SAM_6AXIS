@@ -8,23 +8,23 @@ function check_ros_topic {
     local timeout_time=${2:-2s}
 
     start=$(date +%s.%N) 
-    timeout $timeout_time rostopic echo  ${topic_name} --once  > /dev/null 2>&1
+    timeout $timeout_time rostopic echo  ${topic_name} -n 1  > /dev/null 2>&1
     
     if [ ! $? -eq 0 ]; then
         end=$(date +%s.%N)
         runtime=$(echo "$end - $start" | bc)
-
+        
         if (( $(echo "$runtime > 1" | bc -l) )); then  
             log_error "$topic_name -- NoData"
         else
-            log_error "$topic_name -- non-existent"
+            log_error "$topic_name -- non-existent[$runtime]"
         fi
         
         return 1
     fi
 
     local output=""
-    output=$(rostopic echo ${topic_name} --once 2>/dev/null)
+    output=$(rostopic echo ${topic_name} -n 1 2>/dev/null)
 
     if [[ ! -z "${output}" ]]; then
         log_info "$topic_name -- state normal"
@@ -51,19 +51,27 @@ function read_topic_names(){
 function collect_rosbag(){
     bag_prefix_name=$(yq e '.bag_prefix_name' $config_name)
     bag_dir_path=$(yq e '.bag_dir_path' $config_name)
-    rosbag_path=$bag_dir_path"/"$bag_prefix_name"_"$(date +"%Y-%m-%d-%H_%M_%S")".bag"
+    rosbag_path=$bag_dir_path"/"$bag_prefix_name"_"$(date +"%Y-%m-%d-%H_%M_%S")
+
+    if [ ! -d "$rosbag_path" ]; then
+        mkdir -p "$rosbag_path"
+    fi
+
+    cd $rosbag_path
+    latest_bag=$bag_dir_path"/"$bag_prefix_name"latest_bag"
+    ln -sf $rosbag_path $latest_bag
 
     log_info "Start collect:[$rosbag_path]"
-    # # output: gnss_lidar_2023-04-25-11_07_02
-    rosbag record --split --size=2048 --buffsize=1024 -O $rosbag_path $topic_names
-    ln -sf $rosbag_path "$SCRIPT_DIR/../../rosbag/$bag_prefix_name""_latest_rosbag"
+    rosbag record --split --size=2048 --buffsize=1024  $topic_names
+    log_info "collect Success:[$rosbag_path]"
+    log_info "-------------------------------------------------------"
+    rosbag info $latest_bag/*.bag
+    log_info "-------------------------------------------------------"
 }
 
 function main(){
     topic_names=""
     config_name=$1
-
-    source /root/workspace/lidar_mapping/devel/setup.zsh
 
     if [ -z "$config_name" ];then
         log_error "请输入[ ./collect_rosbag.sh imu.yaml]"
@@ -73,6 +81,5 @@ function main(){
     read_topic_names $config_name
     collect_rosbag
     
-    # log_info "collect Success:[$bag_prefix_name]"
 }
 main $1

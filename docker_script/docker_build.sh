@@ -35,10 +35,10 @@ function is_rm_image(){
 
 function tar_compress_folder(){
   log_info "dockerfile COPY file"
-  tar_file_path=$SCRIPT_DIR/../docker_copy/rosbag_collect_script.tar.gz
+  tar_file_path=$SCRIPT_DIR/../docker_copy.tar.gz
   if [ ! -f "$tar_file_path" ]; then
-    cp $SCRIPT_DIR/yq $SCRIPT_DIR/../docker_copy/rosbag_collect_script/
-    tar -czvf  $tar_file_path   $SCRIPT_DIR/../docker_copy/rosbag_collect_script/
+    cp $SCRIPT_DIR/yq $SCRIPT_DIR/../docker_copy/
+    tar -czvf  $tar_file_path   $SCRIPT_DIR/../docker_copy/
   fi
 }
 
